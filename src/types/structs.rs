@@ -4,6 +4,30 @@ pub trait ToSql {
     fn to_sql(&self) -> ColumnData;
 }
 
+impl Into<i32> for ColumnData {
+    fn into(self) -> i32 {
+        self.data.parse().unwrap()
+    }
+}
+
+impl Into<String> for ColumnData {
+    fn into(self) -> String {
+        self.data
+    }
+}
+
+impl Into<f64> for ColumnData {
+    fn into(self) -> f64 {
+        self.data.parse().unwrap()
+    }
+}
+
+impl Into<DataType> for ColumnData {
+    fn into(self) -> DataType {
+        self.data_type
+    }
+}
+
 impl ToSql for i32 {
     fn to_sql(&self) -> ColumnData {
         ColumnData {

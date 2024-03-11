@@ -63,15 +63,15 @@ impl AlesiaClient {
             params: params.iter().map(|p| p.to_sql()).collect(),
         };
 
-        let message = serde_json::to_vec(&query).unwrap();
+        let message = serde_json::to_vec(&query)?;
 
-        self.connection.write_all(&message).await.unwrap();
-        self.connection.write_all(b"\n").await.unwrap();
+        self.connection.write_all(&message).await?;
+        self.connection.write_all(b"\n").await?;
 
         let mut buffer = [0; 1024];
-        let n: usize = self.connection.read(&mut buffer).await.unwrap();
+        let n: usize = self.connection.read(&mut buffer).await?;
 
-        let response: ResponseDTO = serde_json::from_slice(&buffer[..n]).unwrap();
+        let response: ResponseDTO = serde_json::from_slice(&buffer[..n])?;
 
         Ok(response)
     }

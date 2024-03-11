@@ -1,5 +1,4 @@
 use std::ops::Index;
-
 use super::dto::{ColumnData, DataType, ResponseDTO, TableRowDTO};
 
 pub trait ToSql {

@@ -16,6 +16,7 @@ pub struct QueryDTO {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResponseDTO {
     pub status: String,
+    pub rows_affected: usize,
     pub rows: Vec<TableRow>,
     pub column_count: usize,
     // pub column_names: Vec<&'static str>,
@@ -39,5 +40,6 @@ pub struct ColumnData {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum QueryType {
     EXEC,
-    QUERY
+    QUERY,
+    INSERT
 }

@@ -23,6 +23,10 @@ impl AlesiaClient {
         self.send_request(query, params, QueryType::EXEC).await
     }
 
+    pub async fn insert(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<ResponseDTO, Box<dyn std::error::Error>> {
+        self.send_request(query, params, QueryType::INSERT).await
+    }
+
 
     async fn send_request(
         &mut self,

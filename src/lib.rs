@@ -68,7 +68,7 @@ impl AlesiaClient {
         self.connection.write_all(&message).await?;
         self.connection.write_all(b"\n").await?;
 
-        let mut buffer = [0; 1024];
+        let mut buffer = [0; 20480];
         let n: usize = self.connection.read(&mut buffer).await?;
 
         let response: ResponseDTO = serde_json::from_slice(&buffer[..n])?;

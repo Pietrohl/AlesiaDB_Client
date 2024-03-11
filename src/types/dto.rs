@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct TableRow {
+pub struct TableRowDTO {
     pub columns: Vec<ColumnData>,
 }
 
@@ -17,12 +17,11 @@ pub struct QueryDTO {
 pub struct ResponseDTO {
     pub status: String,
     pub rows_affected: usize,
-    pub rows: Vec<TableRow>,
+    pub rows: Vec<TableRowDTO>,
     pub column_count: usize,
-    // pub column_names: Vec<&'static str>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum DataType {
     NULL,
     INTEGER,
@@ -31,7 +30,7 @@ pub enum DataType {
     BLOB,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ColumnData {
     pub data: String,
     pub data_type: DataType,

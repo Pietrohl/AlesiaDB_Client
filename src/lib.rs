@@ -1,6 +1,6 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
-use types::dto::{QueryType, ResponseDTO};
+use types::dto::{QueryType, ResponseDTO, TableRowDTO};
 use types::structs::ToSql;
 pub mod types;
 
@@ -14,17 +14,26 @@ impl AlesiaClient {
         AlesiaClient { connection }
     }
 
-    pub async fn query(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<ResponseDTO, Box<dyn std::error::Error>> {
-        self.send_request(query, params, QueryType::QUERY).await
+    pub async fn query(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Vec<TableRowDTO>, Box<dyn std::error::Error>> {
+       match self.send_request(query, params, QueryType::QUERY).await {
+            Ok(response) => Ok(response.rows),
+            Err(e) => Err(e),
+       }
     }
 
 
-    pub async fn exec(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<ResponseDTO, Box<dyn std::error::Error>> {
-        self.send_request(query, params, QueryType::EXEC).await
+    pub async fn exec(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<usize, Box<dyn std::error::Error>> {
+        match self.send_request(query, params, QueryType::EXEC).await {
+            Ok(response) => Ok(response.rows_affected),
+            Err(e) => Err(e),
+        }
     }
 
-    pub async fn insert(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<ResponseDTO, Box<dyn std::error::Error>> {
-        self.send_request(query, params, QueryType::INSERT).await
+    pub async fn insert(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<(), Box<dyn std::error::Error>> {
+        match self.send_request(query, params, QueryType::INSERT).await {
+            Ok(_) => Ok(()),
+            Err(e) => Err(e),
+        }
     }
 
 

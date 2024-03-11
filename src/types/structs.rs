@@ -1,6 +1,6 @@
 use std::ops::Index;
 
-use super::dto::{ColumnData, DataType};
+use super::dto::{ColumnData, DataType, ResponseDTO, TableRowDTO};
 
 pub trait ToSql {
     fn to_sql(&self) -> ColumnData;
@@ -85,6 +85,13 @@ pub struct TableRow {
 }
 
 impl TableRow {
+    pub fn from(response: &ResponseDTO, row: &TableRowDTO) -> Self {
+        TableRow {
+            column_name: response.column_names.to_owned(),
+            columns: row.columns.to_owned(),
+        }
+    }
+
     pub fn get(&self, index: usize) -> ColumnData {
         self.columns.index(index).clone()
     }

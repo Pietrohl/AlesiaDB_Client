@@ -19,6 +19,7 @@ pub struct ResponseDTO {
     pub rows_affected: usize,
     pub rows: Vec<TableRowDTO>,
     pub column_count: usize,
+    pub column_names: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

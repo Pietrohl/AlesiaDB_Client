@@ -1,7 +1,7 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
-use types::dto::{QueryType, ResponseDTO, TableRowDTO};
-use types::structs::ToSql;
+use types::dto::{QueryType, ResponseDTO};
+use types::structs::{TableRow, ToSql};
 pub mod types;
 
 pub struct AlesiaClient {
@@ -14,28 +14,42 @@ impl AlesiaClient {
         AlesiaClient { connection }
     }
 
-    pub async fn query(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Vec<TableRowDTO>, Box<dyn std::error::Error>> {
-       match self.send_request(query, params, QueryType::QUERY).await {
-            Ok(response) => Ok(response.rows),
+    pub async fn query(
+        &mut self,
+        query: &str,
+        params: &[&(dyn ToSql + Sync)],
+    ) -> Result<Vec<TableRow>, Box<dyn std::error::Error>> {
+        match self.send_request(query, params, QueryType::QUERY).await {
+            Ok(response) => Ok(response
+                .rows
+                .iter()
+                .map(|row| TableRow::from(&response, row))
+                .collect()),
             Err(e) => Err(e),
-       }
+        }
     }
 
-
-    pub async fn exec(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<usize, Box<dyn std::error::Error>> {
+    pub async fn exec(
+        &mut self,
+        query: &str,
+        params: &[&(dyn ToSql + Sync)],
+    ) -> Result<usize, Box<dyn std::error::Error>> {
         match self.send_request(query, params, QueryType::EXEC).await {
             Ok(response) => Ok(response.rows_affected),
             Err(e) => Err(e),
         }
     }
 
-    pub async fn insert(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn insert(
+        &mut self,
+        query: &str,
+        params: &[&(dyn ToSql + Sync)],
+    ) -> Result<(), Box<dyn std::error::Error>> {
         match self.send_request(query, params, QueryType::INSERT).await {
             Ok(_) => Ok(()),
             Err(e) => Err(e),
         }
     }
-
 
     async fn send_request(
         &mut self,

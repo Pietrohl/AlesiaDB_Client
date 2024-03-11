@@ -9,6 +9,7 @@ pub struct TableRow {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct QueryDTO {
     pub query: String,
+    pub query_type: QueryType,
     pub params: Vec<ColumnData>,
 }
 
@@ -33,4 +34,10 @@ pub enum DataType {
 pub struct ColumnData {
     pub data: String,
     pub data_type: DataType,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum QueryType {
+    EXEC,
+    QUERY
 }

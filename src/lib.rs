@@ -1,6 +1,6 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
-use types::dto::ResponseDTO;
+use types::dto::{QueryType, ResponseDTO};
 use types::structs::ToSql;
 pub mod types;
 
@@ -14,12 +14,24 @@ impl AlesiaClient {
         AlesiaClient { connection }
     }
 
-    pub async fn send_query(
+    pub async fn query(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<ResponseDTO, Box<dyn std::error::Error>> {
+        self.send_request(query, params, QueryType::QUERY).await
+    }
+
+
+    pub async fn exec(&mut self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<ResponseDTO, Box<dyn std::error::Error>> {
+        self.send_request(query, params, QueryType::EXEC).await
+    }
+
+
+    async fn send_request(
         &mut self,
         query: &str,
-        params:  &[&(dyn ToSql + Sync)],
+        params: &[&(dyn ToSql + Sync)],
+        query_type: QueryType,
     ) -> Result<ResponseDTO, Box<dyn std::error::Error>> {
         let query = types::dto::QueryDTO {
+            query_type: query_type,
             query: query.to_string(),
             params: params.iter().map(|p| p.to_sql()).collect(),
         };
@@ -50,7 +62,7 @@ mod tests {
             let query = "SELECT * FROM users;";
             let params: Vec<&(dyn ToSql + Sync)> = vec![];
 
-            let result = client.send_query(query, &params).await;
+            let result = client.query(query, &params).await;
             assert!(result.is_ok());
         });
     }

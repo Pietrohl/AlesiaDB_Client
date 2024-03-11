@@ -7,7 +7,7 @@ pub struct TableRow {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct QueryDTO {
+pub struct QueryDTO {
     pub query: String,
     pub params: Vec<ColumnData>,
 }

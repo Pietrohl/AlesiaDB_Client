@@ -7,7 +7,7 @@ pub struct TableRowDTO {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct QueryDTO {
+pub struct RequestDTO {
     pub query: String,
     pub query_type: QueryType,
     pub params: Vec<ColumnData>,
@@ -29,6 +29,8 @@ pub enum DataType {
     FLOAT,
     TEXT,
     BLOB,
+    DATE,
+    BOOLEAN,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

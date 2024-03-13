@@ -1,7 +1,7 @@
-use std::ops::Index;
 use super::dto::{ColumnData, DataType, ResponseDTO, TableRowDTO};
+use std::ops::Index;
 
-pub trait ToSql {
+pub trait ToColumnDate {
     fn to_sql(&self) -> ColumnData;
 }
 
@@ -29,7 +29,7 @@ impl Into<DataType> for ColumnData {
     }
 }
 
-impl ToSql for i32 {
+impl ToColumnDate for i32 {
     fn to_sql(&self) -> ColumnData {
         ColumnData {
             data: self.to_string().into(),
@@ -38,7 +38,7 @@ impl ToSql for i32 {
     }
 }
 
-impl ToSql for String {
+impl ToColumnDate for String {
     fn to_sql(&self) -> ColumnData {
         ColumnData {
             data: self.clone(),
@@ -47,7 +47,7 @@ impl ToSql for String {
     }
 }
 
-impl ToSql for f64 {
+impl ToColumnDate for f64 {
     fn to_sql(&self) -> ColumnData {
         ColumnData {
             data: self.to_string().into(),

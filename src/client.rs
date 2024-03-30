@@ -70,6 +70,7 @@ impl AlesiaClient {
         let message = serde_json::to_vec(&query)?;
 
         self.connection.write_all(&message).await?;
+        self.connection.write_all(b"\n").await?;
         self.connection.flush().await?;
 
         let mut buffer = [0; 20480];

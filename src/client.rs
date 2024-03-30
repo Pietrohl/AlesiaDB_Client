@@ -71,6 +71,7 @@ impl AlesiaClient {
 
         self.connection.write_all(&message).await?;
         self.connection.write_all(b"\n").await?;
+        self.connection.flush().await?;
 
         let mut buffer = [0; 20480];
         let n: usize = self.connection.read(&mut buffer).await?;

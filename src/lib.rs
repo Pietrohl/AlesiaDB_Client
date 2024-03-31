@@ -5,8 +5,7 @@ pub mod config;
 pub mod types;
 
 pub async fn new_from_url(url: &'static str) -> client::AlesiaClient {
-    let config = Config { path: url };
+    let config = Config::from_str(url).unwrap();
     client::AlesiaClient::create(config).await
 }
-
 

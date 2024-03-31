@@ -1,0 +1,19 @@
+[package]
+name = "bb8_alesia"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+alesia_client = {path = "../"}
+async-trait = "0.1.79"
+bb8 = "0.8.3"
+tokio = { version = "1", features = ["rt"] }
+
+
+
+
+[lib]
+name = "bb8_alesia"
+path = "lib.rs"

@@ -1,6 +1,4 @@
-use std::error::Error;
-
-use alesia_client::client::AlesiaClient;
+use alesia_client::{client::AlesiaClient, errors::Error};
 
 pub struct AlesiaConnectionManager {
     config: alesia_client::config::Config,
@@ -11,7 +9,7 @@ impl AlesiaConnectionManager {
         Self { config }
     }
 
-    pub fn new_from_url(url: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn new_from_url(url: &str) -> Result<Self, Box<Error>> {
         let config = alesia_client::config::Config::from_str(url)?;
 
         Ok(Self { config })
@@ -21,11 +19,11 @@ impl AlesiaConnectionManager {
 #[async_trait::async_trait]
 impl bb8::ManageConnection for AlesiaConnectionManager {
     type Connection = AlesiaClient;
-    type Error = Box<dyn std::error::Error + Send + Sync>;
+    type Error = Error;
 
     async fn connect(&self) -> Result<Self::Connection, Self::Error> {
         let client = self.config.clone().connect().await;
-        Ok(client)
+        client
     }
 
     async fn is_valid(&self, _: &mut Self::Connection) -> Result<(), Self::Error> {

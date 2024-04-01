@@ -1,8 +1,12 @@
-use crate::{config::Config, types::{
-    self,
-    dto::{QueryType, ResponseDTO},
-    structs::{TableRow, ToColumnDate},
-}};
+use crate::{
+    config::Config,
+    errors::{AlesiaError, Error},
+    types::{
+        self,
+        dto::{QueryType, ResponseDTO},
+        structs::{TableRow, ToColumnDate},
+    },
+};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
@@ -13,16 +17,18 @@ pub struct AlesiaClient {
 }
 
 impl AlesiaClient {
-    pub (crate) async fn create(config: Config) -> AlesiaClient {
-        let connection = TcpStream::connect(config.path).await.unwrap();
-        AlesiaClient { connection }
+    pub(crate) async fn create(config: Config) -> Result<AlesiaClient, Error> {
+        let connection = TcpStream::connect(config.path)
+            .await
+            .map_err(|e: std::io::Error| Error::IoError(AlesiaError(e.into())))?;
+        Ok(AlesiaClient { connection })
     }
 
     pub async fn query(
         &mut self,
         query: &str,
         params: &[&(dyn ToColumnDate + Sync)],
-    ) -> Result<Vec<TableRow>, Box<dyn std::error::Error>> {
+    ) -> Result<Vec<TableRow>, Error> {
         match self.send_request(query, params, QueryType::QUERY).await {
             Ok(response) => Ok(response
                 .rows
@@ -37,7 +43,7 @@ impl AlesiaClient {
         &mut self,
         query: &str,
         params: &[&(dyn ToColumnDate + Sync)],
-    ) -> Result<usize, Box<dyn std::error::Error>> {
+    ) -> Result<usize, Error> {
         match self.send_request(query, params, QueryType::EXEC).await {
             Ok(response) => Ok(response.rows_affected),
             Err(e) => Err(e),
@@ -48,7 +54,7 @@ impl AlesiaClient {
         &mut self,
         query: &str,
         params: &[&(dyn ToColumnDate + Sync)],
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<(), Error> {
         match self.send_request(query, params, QueryType::INSERT).await {
             Ok(_) => Ok(()),
             Err(e) => Err(e),
@@ -60,22 +66,34 @@ impl AlesiaClient {
         query: &str,
         params: &[&(dyn ToColumnDate + Sync)],
         query_type: QueryType,
-    ) -> Result<ResponseDTO, Box<dyn std::error::Error>> {
+    ) -> Result<ResponseDTO, Error> {
         let query = types::dto::RequestDTO {
             query_type: query_type,
             query: query.to_string(),
             params: params.iter().map(|p| p.to_sql()).collect(),
         };
 
-        let message = serde_json::to_vec(&query)?;
+        let message = serde_json::to_vec(&query)
+            .map_err(|e: serde_json::Error| Error::invalid_query(AlesiaError(e.into())))?;
 
-        self.connection.write_all(&message).await?;
-        self.connection.flush().await?;
+        self.connection
+            .write_all(&message)
+            .await
+            .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
+        self.connection
+            .flush()
+            .await
+            .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
 
         let mut buffer = [0; 20480];
-        let n: usize = self.connection.read(&mut buffer).await?;
+        let n: usize = self
+            .connection
+            .read(&mut buffer)
+            .await
+            .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
 
-        let response: ResponseDTO = serde_json::from_slice(&buffer[..n])?;
+        let response: ResponseDTO = serde_json::from_slice(&buffer[..n])
+            .map_err(|e: serde_json::Error| Error::IoError(AlesiaError(e.into())))?;
 
         Ok(response)
     }

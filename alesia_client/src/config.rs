@@ -1,7 +1,6 @@
-use std::io::Error;
 use url::Url;
 
-use crate::client::AlesiaClient;
+use crate::{client::AlesiaClient, errors::Error};
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -9,12 +8,9 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_str(url: &str) -> Result<Self, Box<Error>> {
+    pub fn from_str(url: &str) -> Result<Self, Error> {
         if !is_url(url) && !is_ip_addr(url) {
-            return Err(Box::new(Error::new(
-                std::io::ErrorKind::InvalidInput,
-                "Invalid URL",
-            )));
+            return Err(Error::ConfigError("Invalid URL".into()));
         }
 
         Ok(Self {
@@ -22,7 +18,7 @@ impl Config {
         })
     }
 
-    pub async fn connect(self) -> AlesiaClient {
+    pub async fn connect(self) -> Result<AlesiaClient, Error> {
         AlesiaClient::create(self).await
     }
 }

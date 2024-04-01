@@ -115,6 +115,7 @@ dependencies = [
  "alesia_client",
  "async-trait",
  "bb8",
+ "rusqlite",
  "tokio",
 ]
 

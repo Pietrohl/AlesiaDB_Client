@@ -28,11 +28,11 @@ impl bb8::ManageConnection for AlesiaConnectionManager {
         Ok(client)
     }
 
-    async fn is_valid(&self, conn: &mut Self::Connection) -> Result<(), Self::Error> {
+    async fn is_valid(&self, _: &mut Self::Connection) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn has_broken(&self, conn: &mut Self::Connection) -> bool {
+    fn has_broken(&self, _: &mut Self::Connection) -> bool {
         false
     }
 }

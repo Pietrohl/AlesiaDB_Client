@@ -97,4 +97,20 @@ impl AlesiaClient {
 
         Ok(response)
     }
+
+    // This can be implemented to close the connection
+    // pub async fn close(&mut self) -> Result<(), Error> {
+    //     self.connection
+    //         .shutdown()
+    //         .await
+    //         .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
+    //     Ok(())
+    // }
+
+    // This will be used by bb8 to check if the connection is still valid
+    // The connection is valid if the TCP connection is still running
+    // and a ping message would have a correct pong response
+    // pub async fn is_close(&mut self) -> Result<bool, Error> {
+    //     Ok(false)
+    // }
 }

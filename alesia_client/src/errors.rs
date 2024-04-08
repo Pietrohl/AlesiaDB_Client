@@ -45,3 +45,16 @@ impl Error {
         Self::InvalidQuery(e)
     }
 }
+
+
+impl Display for Error {
+    
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::RusqliteError(e) => Display::fmt(e, f),
+            Self::ConfigError(e) => Display::fmt(e, f),
+            Self::IoError(e) => Display::fmt(e, f),
+            Self::InvalidQuery(e) => Display::fmt(e, f),
+        }
+    }
+}

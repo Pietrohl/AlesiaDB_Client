@@ -27,7 +27,7 @@ impl bb8::ManageConnection for AlesiaConnectionManager {
     }
 
     async fn is_valid(&self, conn: &mut Self::Connection) -> Result<(), Self::Error> {
-        tokio::task::block_in_place(|| async move { conn.exec("SELECT 1;", &[]).await }).await?;
+        tokio::task::block_in_place(|| async move { conn.query("SELECT 1;", &[]).await }).await?;
         Ok(())
     }
 

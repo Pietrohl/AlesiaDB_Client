@@ -1,5 +1,6 @@
 use crate::{
     config::Config,
+    connection::{self},
     errors::{AlesiaError, Error},
     types::{
         self,
@@ -7,10 +8,7 @@ use crate::{
         structs::{TableRow, ToColumnDate},
     },
 };
-use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::TcpStream,
-};
+use tokio::net::TcpStream;
 
 pub struct AlesiaClient {
     connection: TcpStream,
@@ -76,23 +74,9 @@ impl AlesiaClient {
         let message = serde_json::to_vec(&query)
             .map_err(|e: serde_json::Error| Error::invalid_query(AlesiaError(e.into())))?;
 
-        self.connection
-            .write_all(&message)
-            .await
-            .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
-        self.connection
-            .flush()
-            .await
-            .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
+        let response_message = connection::write_message(&message, &mut self.connection).await?;
 
-        let mut buffer = [0; 20480];
-        let n: usize = self
-            .connection
-            .read(&mut buffer)
-            .await
-            .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
-
-        let response: ResponseDTO = serde_json::from_slice(&buffer[..n])
+        let response: ResponseDTO = serde_json::from_str(response_message.as_str())
             .map_err(|e: serde_json::Error| Error::IoError(AlesiaError(e.into())))?;
 
         Ok(response)

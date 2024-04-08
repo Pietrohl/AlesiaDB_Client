@@ -3,6 +3,7 @@ use errors::Error;
 pub mod client;
 pub mod config;
 pub mod errors;
+pub mod connection;
 // pub mod connection;
 pub mod types;
 

@@ -4,7 +4,6 @@ pub mod client;
 pub mod config;
 pub mod errors;
 pub mod connection;
-// pub mod connection;
 pub mod types;
 
 pub async fn new_from_url(url: &str) -> Result<client::AlesiaClient, Error> {

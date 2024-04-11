@@ -46,9 +46,7 @@ impl Error {
     }
 }
 
-
 impl Display for Error {
-    
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::RusqliteError(e) => Display::fmt(e, f),
@@ -58,3 +56,18 @@ impl Display for Error {
         }
     }
 }
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::RusqliteError(e) => Some(e),
+            Self::ConfigError(e) => Some(&*e.0),
+            Self::IoError(e) => Some(&*e.0),
+            Self::InvalidQuery(e) => Some(&*e.0),
+        }
+    }
+}
+
+
+
+

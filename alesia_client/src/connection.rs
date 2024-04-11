@@ -111,6 +111,36 @@ impl Serialize for RequestDTO {
     }
 }
 
+impl Serialize for ResponseDTO {
+    async fn serialize(&self, connection: &mut CodecConnection) -> Result<(), Error> {
+        let message =
+            &serde_json::to_vec(self).map_err(|e| Error::IoError(AlesiaError(e.into())))?;
+
+        connection.send_message(self.into(), &message).await
+    }
+}
+
+impl Deserialize for RequestDTO {
+    type Output = RequestDTO;
+
+    async fn deserialize(connection: &mut CodecConnection) -> Result<Self::Output, Error> {
+        let (code, message) = connection.read_message().await?;
+
+        match code {
+            MessageCode::RequestQuery | MessageCode::RequestExec | MessageCode::RequestInsert => {
+                let request: RequestDTO = serde_json::from_slice(&message)
+                    .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
+                Ok(request)
+            }
+            _ => {
+                let error_message = String::from_utf8(message.to_vec())
+                    .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
+                Err(Error::io(AlesiaError(error_message.into())))
+            }
+        }
+    }
+}
+
 impl Deserialize for ResponseDTO {
     type Output = ResponseDTO;
 
@@ -172,5 +202,11 @@ impl From<&RequestDTO> for MessageCode {
             QueryType::EXEC => MessageCode::RequestExec,
             QueryType::INSERT => MessageCode::RequestInsert,
         }
+    }
+}
+
+impl From<&ResponseDTO> for MessageCode {
+    fn from(_self: &ResponseDTO) -> Self {
+        MessageCode::SuccessResponse
     }
 }

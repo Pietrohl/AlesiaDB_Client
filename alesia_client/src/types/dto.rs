@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct TableRowDTO {
     pub columns: Vec<ColumnData>,
 }
@@ -22,7 +21,7 @@ pub struct ResponseDTO {
     pub column_names: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum DataType {
     NULL,
     INTEGER,
@@ -33,15 +32,15 @@ pub enum DataType {
     BOOLEAN,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ColumnData {
     pub data: String,
     pub data_type: DataType,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum QueryType {
     EXEC,
     QUERY,
-    INSERT
+    INSERT,
 }

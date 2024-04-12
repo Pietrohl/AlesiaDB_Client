@@ -11,17 +11,15 @@ use crate::{
 use tokio::net::TcpStream;
 
 pub struct AlesiaClient {
-    connection: connection::CodecConnection,
+    connection: TcpStream,
 }
 
 impl AlesiaClient {
     pub(crate) async fn create(config: Config) -> Result<AlesiaClient, Error> {
-        let stream = TcpStream::connect(config.path)
+        let connection = TcpStream::connect(config.path)
             .await
             .map_err(|e: std::io::Error| Error::IoError(AlesiaError(e.into())))?;
-       
-        let connection = connection::CodecConnection::new(stream).await;
-       
+
         Ok(AlesiaClient { connection })
     }
 
@@ -77,7 +75,8 @@ impl AlesiaClient {
         // let message = serde_json::to_vec(&query)
         //     .map_err(|e: serde_json::Error| Error::invalid_query(AlesiaError(e.into())))?;
 
-        let response = connection::write_message::<ResponseDTO>(&query, &mut self.connection).await?;
+        let response =
+            connection::write_message::<ResponseDTO>(&query, &mut self.connection).await?;
 
         // let response: ResponseDTO = serde_json::from_str(response_message.as_str())
         //     .map_err(|e: serde_json::Error| Error::IoError(AlesiaError(e.into())))?;

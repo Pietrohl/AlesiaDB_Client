@@ -1,3 +1,5 @@
+use std::{net::TcpStream, time::Duration};
+
 use crate::{
     config::Config,
     connection::{self},
@@ -8,17 +10,20 @@ use crate::{
         structs::{TableRow, ToColumnDate},
     },
 };
-use tokio::net::TcpStream;
+
+use tokio::net::TcpStream as TokioTcpStream;
 
 pub struct AlesiaClient {
-    connection: TcpStream,
+    connection: TokioTcpStream,
 }
 
 impl AlesiaClient {
     pub(crate) async fn create(config: Config) -> Result<AlesiaClient, Error> {
-        let connection = TcpStream::connect(config.path)
-            .await
+        let std_connection = TcpStream::connect_timeout(&config.path, Duration::from_secs(30))
             .map_err(|e: std::io::Error| Error::IoError(AlesiaError(e.into())))?;
+
+        let connection = TokioTcpStream::from_std(std_connection)
+            .map_err(|e| Error::IoError(AlesiaError(e.into())))?;
 
         Ok(AlesiaClient { connection })
     }

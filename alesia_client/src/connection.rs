@@ -76,7 +76,8 @@ where
             let err = match n {
                 52 => Error::config(AlesiaError(error_message.into())),
                 53 => Error::invalid_query(AlesiaError(error_message.into())),
-                54 => Error::RusqliteError(rusqlite::Error::InvalidQuery),
+                54 => Error::RusqliteError(rusqlite::Error::QueryReturnedNoRows),
+                55 => Error::RusqliteError(rusqlite::Error::ExecuteReturnedResults),
                 _ => Error::io(AlesiaError(error_message.into())),
             };
 
@@ -243,7 +244,11 @@ impl From<&Error> for MessageCode {
             Error::IoError(_) => MessageCode::Error(51),
             Error::ConfigError(_) => MessageCode::Error(52),
             Error::InvalidQuery(_) => MessageCode::Error(53),
-            Error::RusqliteError(_) => MessageCode::Error(54),
+            Error::RusqliteError(rusqlite_error) => match rusqlite_error {
+                rusqlite::Error::QueryReturnedNoRows => MessageCode::Error(54),
+                rusqlite::Error::ExecuteReturnedResults => MessageCode::Error(55),
+                _ => MessageCode::Error(56),
+            },
         }
     }
 }
